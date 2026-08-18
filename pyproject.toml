@@ -1,0 +1,31 @@
+[project]
+name = "graphql"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "shyamjith s", email = "shyamjith.s@talksandtalks.ai" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "alembic>=1.19.1",
+    "asyncpg>=0.31.0",
+    "fastapi>=0.141.1",
+    "gql[httpx]>=4.0.0",
+    "greenlet>=3.5.5",
+    "pydantic-settings>=2.15.0",
+    "pydantic[email]>=2.13.4",
+    "sqlalchemy>=2.0.52",
+    "strawberry-graphql[fastapi]>=0.324.0",
+    "uvicorn>=0.52.3",
+]
+
+[project.scripts]
+graphql = "graphql:main"
+
+[build-system]
+requires = ["uv_build>=0.12.5,<0.13.0"]
+build-backend = "uv_build"
+
+[tool.pyright]
+extraPaths = ["."]
