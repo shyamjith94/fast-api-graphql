@@ -2,24 +2,29 @@ from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
+from sqlalchemy.engine import Connection
+from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
 
-from src.models.base import BaseModel
-from sqlalchemy.ext.asyncio import async_engine_from_config
-from sqlalchemy.engine import Connection
 import sys
 from pathlib import Path
+
 # Add src/ to Python path
 BASE_DIR = Path(__file__).resolve().parent.parent
 SRC_DIR = BASE_DIR / "src"
-
 sys.path.insert(0, str(SRC_DIR))
+
+from src.models.base import BaseModel
+import src.models  # noqa: F401 - ensure all models are registered
 from src.core.settings import settings
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
+
+if settings.database_url:
+    config.set_main_option("sqlalchemy.url", settings.database_url)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
@@ -28,8 +33,6 @@ if config.config_file_name is not None:
 
 # add your model's MetaData object here
 # for 'autogenerate' support
-# from myapp import mymodel
-# target_metadata = mymodel.Base.metadata
 target_metadata = BaseModel.metadata
 
 # other values from the config, defined by the needs of env.py,
@@ -72,10 +75,8 @@ def do_run_migrations(connection:Connection)-> None:
     with context.begin_transaction():
         context.run_migrations()
 
-async def run_asyncio_migrations()->None:
-    configuration = config.get_section(
-        config.config_ini_section
-    )
+async def run_asyncio_migrations() -> None:
+    configuration = config.get_section(config.config_ini_section, {}) or {}
     configuration["sqlalchemy.url"] = settings.database_url
 
     connectable = async_engine_from_config(
